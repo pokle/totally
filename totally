@@ -34,6 +34,7 @@ function usage() {
 	-	run 	Builds a Docker image for your app, and runs it
 
 	Troubleshooting commands:
+	-	config 	 Show Totally configuration
 	-	logs     Tails the console- Hit ^C to stop it
 	-	restart  Restarts the container ignoring errors with stopping
 	- 	inspect  Shows you information about your container
@@ -148,6 +149,22 @@ function cmd_top() {
 }
 
 function cmd_man() { :; }
+
+function cmd_config() {
+	cat <<-HERE
+		# Project name
+		NAME=$NAME
+		LOCAL_ROOT=$LOCAL_ROOT
+
+		# Docker
+		IMAGE=$IMAGE
+		CONTAINER=$CONTAINER
+
+		# Docker host
+		DOCKER_SSH_HOST=$DOCKER_SSH_HOST
+		REMOTE_ROOT=$REMOTE_ROOT
+	HERE
+}
 
 function command_loop() {
 	if [ -z "$1" ]; then
