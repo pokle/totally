@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-
+#
+# Totally is inspired by Leiningen, Heroku, and swimming pools
 
 ((ERRORS=0))
 function error() {
@@ -18,22 +19,41 @@ function log() {
 	:
 }
 
+function cmd_verbose() {
+	function log() { echo $@ >&2; }
+	set -x
+	log increased verbosity
+}
+
 function usage() {
 	cat <<-USAGE >&2
 	usage: $0 COMMANDS
 	
-	Commands:
+	Main commands:
 
-		init	Initialise a new project
-		verbose Turn on some extra logging
-		deploy	Deploys the current project
-		stop	stops the current project
+	.	init	Initialise a new project named after the current directory
+	.	deploy	Builds and restarts your app - this is your fast feed back loop
+
+	Troubleshooting commands:
+
+	.	log     Tails the console, as well as any additional log files specified
+
+	Auxilliary commands:
+
+	.	verbose Turn on some extra logging
+	.	build   Builds a Docker image for your project
+
+	.	# Coming soon:
+	.	# stop    Stops your container - you don't lose data
+	.	# start	Starts your container - starts a stopped container
+	.	# remove  Removes your container (not your image)
+	.	# restart Restarts the container ignoring errors with stopping
 
 	USAGE
 	exit 1
 }
 
-function init() {
+function cmd_init() {
 	[ -f .totally ] && die "This directory has already been initialised. 'cat .totally' to see your project."
 
 	local name=$(basename $PWD)
@@ -60,6 +80,7 @@ function configuration_walk() {
 function validate_configuration() {
 	[ -z "$DOCKER_SSH_HOST" ] && error "Missing docker host name env DOCKER_SSH_HOST"
 	[ -z "$NAME" ] && error "Missing project name env NAME. Are you in a project? Have you run a totally init?" 
+	
 	(( ERRORS > 0 )) && 
 		die "Add missing envs to a .totally file either in your home directory, or project directories."
 }
@@ -94,7 +115,15 @@ function restart_container() {
 	HERE
 }
 
-function deploy() {
+function cmd_build() {
+	configure
+	echo building Docker image called $NAME on $DOCKER_SSH_HOST
+
+	sync_up
+	build_image
+}
+
+function cmd_deploy() {
 	configure
 	echo deploying $NAME \($LOCAL_ROOT\) to $DOCKER_SSH_HOST:$REMOTE_ROOT
 	
@@ -104,24 +133,23 @@ function deploy() {
 }
 
 
-if [ -z "$1" ]; then
-	usage
-fi
+function command_loop() {
+	if [ -z "$1" ]; then
+		usage
+	fi
 
-while true; do
-	CMD=$1
-	[ -z "$CMD" ] && exit 0
-	shift
+	while true; do
+		CMD=$1
+		[ -z "$CMD" ] && exit 0
+		shift
 
-	case $CMD in
-		"verbose") 
-			function log() { echo $@ >&2; }
-			set -x
-			log increased verbosity ;;
-		"nop");;
-		"deploy") deploy $@;;
-		"init") init $@;;
-	 	"stop") echo whatever bro ;;
-	 	*) usage ;;
-	esac
-done
+		if [ $( type -t cmd_$CMD ) = "function" ]; then
+			cmd_$CMD
+		else
+			error Sorry, no such command $CMD
+			usage
+		fi
+	done
+}
+
+command_loop $@
