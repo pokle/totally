@@ -20,7 +20,7 @@ function log() {
 
 function usage() {
 	cat <<-USAGE >&2
-	usage: $0 COMMAND ARG...
+	usage: $0 [--verbose] COMMANDS
 	
 	Commands:
 
@@ -37,6 +37,9 @@ function init() {
 	echo NAME=\"$name\" > .totally
 }
 
+# Recurses up from the current directory all the way to the root
+# directory looking for .totally files to source for configuration overrides
+# Also sets LOCAL_ROOT - which should be the local project root
 function configuration_walk() {
 	if [ "/" != "$PWD" ]; then
 		pushd .. >/dev/null
@@ -44,8 +47,10 @@ function configuration_walk() {
 		popd >/dev/null
 	fi
 	
-	log Sourcing overrides from $PWD/.totally
-	[ -r $PWD/.totally ] && source $PWD/.totally
+	[ -r $PWD/.totally ] && 
+		log "Sourcing overrides from $PWD/.totally" && 
+		source $PWD/.totally &&
+		LOCAL_ROOT=$PWD # The last recursed $PWD should be the local project root
 }
 
 function validate_configuration() {
@@ -58,18 +63,24 @@ function validate_configuration() {
 function configure() {
 	log Sourcing user defaults from ~/.totally
 	source ~/.totally
+	
+	log Overriding with project overrides recursively till /
 	configuration_walk $PWD
+
+	[ -z "REMOTE_ROOT" ] && REMOTE_ROOT=totally/$NAME
+
 	validate_configuration
 }
 
 function deploy() {
 	configure
-	echo deploying $NAME to $DOCKER_SSH_HOST
-	# rsync build
+	echo deploying $NAME \($LOCAL_ROOT\) to $DOCKER_SSH_HOST:$REMOTE_ROOT
+	sync
 	# build new image
 	# stop existing container
 	# start new container
 }
+
 
 if [ -z "$1" ]; then
 	usage
@@ -84,6 +95,7 @@ while true; do
 		"--verbose") 
 			function log() { echo $@ >&2; }
 			log increased verbosity ;;
+		"nop");;
 		"deploy") deploy $@;;
 		"init") init $@;;
 	 	"stop") echo whatever bro ;;

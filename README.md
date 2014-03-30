@@ -5,13 +5,24 @@ Totally runs a single container on a remote Docker host, and patches through any
 
 Pre-requisites
 --------------
-1. A host running Docker that you can ssh to without having to type in a password (with your key set up). Totally will ssh to the box, and expect to be able to connect to Docker on 
+1. A host running Docker that you can ssh to without having to type in a password (with your key set up). Totally will ssh to the box, and expect to be able to connect to Docker on it.
 
-		echo DOCKER_SSH_HOST=HOST > ~/.totally
+			echo DOCKER_SSH_HOST=my-super-docker-fragalistic > ~/.totally
 
-If you want to specify ssh ports, users, keys, etc., do it in your ~/.ssh/config file
+	If you want to specify ssh ports, users, keys, etc., do it in your ~/.ssh/config file. Here's how I connect to my CoreOS Vagrant VM on my laptop:
 
-2. Tools on your local computer: rsync
+			Host my-super-docker-fragalistic
+				User core
+				IdentityFile ~/.ssh/coreos_insecure_ssh_key
+				Host 192.168.67.144
+
+2. Install tools on your local computer: rsync
+
+Install
+-------
+
+		sudo curl https://github.com/pokle/totally/blob/master/totally -o /usr/local/bin/totally
+		sudo chmod a+rx /usr/local/bin/totally
 
 Examples
 --------
