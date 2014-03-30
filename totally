@@ -20,11 +20,12 @@ function log() {
 
 function usage() {
 	cat <<-USAGE >&2
-	usage: $0 [--verbose] COMMANDS
+	usage: $0 COMMANDS
 	
 	Commands:
 
 		init	Initialise a new project
+		verbose Turn on some extra logging
 		deploy	Deploys the current project
 		stop	stops the current project
 
@@ -33,8 +34,11 @@ function usage() {
 }
 
 function init() {
+	[ -f .totally ] && die "This directory has already been initialised. 'cat .totally' to see your project."
+
 	local name=$(basename $PWD)
 	echo NAME=\"$name\" > .totally
+	echo Initialised new Totally project called $name
 }
 
 # Recurses up from the current directory all the way to the root
@@ -67,16 +71,27 @@ function configure() {
 	log Overriding with project overrides recursively till /
 	configuration_walk $PWD
 
-	[ -z "REMOTE_ROOT" ] && REMOTE_ROOT=totally/$NAME
+	if [ -z "$REMOTE_ROOT" ]; then REMOTE_ROOT=totally-build; fi
 
 	validate_configuration
+}
+
+function sync_up() {
+	ssh $DOCKER_SSH_HOST "mkdir -p '$REMOTE_ROOT'"
+	rsync --archive --delete $LOCAL_ROOT/ $DOCKER_SSH_HOST:$REMOTE_ROOT/$NAME/
+}
+
+function build_image() {
+	ssh $DOCKER_SSH_HOST "cd $REMOTE_ROOT/$NAME; echo building $NAME in \$HOSTNAME:\$PWD; docker build -t $NAME ."
 }
 
 function deploy() {
 	configure
 	echo deploying $NAME \($LOCAL_ROOT\) to $DOCKER_SSH_HOST:$REMOTE_ROOT
-	sync
-	# build new image
+	
+	sync_up
+	build_image
+	
 	# stop existing container
 	# start new container
 }
@@ -92,8 +107,9 @@ while true; do
 	shift
 
 	case $CMD in
-		"--verbose") 
+		"verbose") 
 			function log() { echo $@ >&2; }
+			set -x
 			log increased verbosity ;;
 		"nop");;
 		"deploy") deploy $@;;

@@ -1,7 +1,9 @@
 Totally
 =======
 
-Totally runs a single container on a remote Docker host, and patches through any ports you require through ssh tunnels.
+Totally helps you rapidly deploy your apps to a Docker host. It works in a way that's amenable to continuous delivery. When you want to have the quickest feedback loop from code change to seeing your changes running. 
+
+Totally also tunnels ports from your container running in the cloud to your laptop, so that you can quickly develop your apps, as well as 
 
 Pre-requisites
 --------------
@@ -14,7 +16,7 @@ Pre-requisites
 			Host my-super-docker-fragalistic
 				User core
 				IdentityFile ~/.ssh/coreos_insecure_ssh_key
-				Host 192.168.67.144
+				HostName 192.168.67.144
 
 2. Install tools on your local computer: rsync
 
