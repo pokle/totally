@@ -1,16 +1,29 @@
 #!/usr/bin/env bash
 
-source ~/.totally
 
-CMD=$1
-shift
+((ERRORS=0))
+function error() {
+	echo $@ >&2
+	((ERRORS++))
+}
+
+function die() {
+	error $@
+	exit 1
+}
+
+function log() {
+	echo -n
+	# use --verbose
+}
 
 function usage() {
 	cat <<-USAGE >&2
 	usage: $0 COMMAND ARG...
 	
 	Commands:
-	
+
+		init	Initialise a new project
 		deploy	Deploys the current project
 		stop	stops the current project
 
@@ -18,13 +31,57 @@ function usage() {
 	exit 1
 }
 
-function deploy() {
-	echo deploy $@
+function init() {
+	local name=$(basename $PWD)
+	echo NAME=\"$name\" > .totally
 }
 
-case $CMD in
-	"deploy") deploy $@ ;;
- 	"stop") echo whatever bro ;;
- 	*) usage ;;
-esac
+function configuration_walk() {
+	if [ "/" != "$PWD" ]; then
+		pushd .. >/dev/null
+		configuration_walk
+		popd >/dev/null
+	fi
+	
+	log Sourcing overrides from $PWD/.totally
+	[ -r $PWD/.totally ] && source $PWD/.totally
+}
 
+function validate_configuration() {
+	[ -z "$DOCKER_SSH_HOST" ] && error "Missing docker host name env DOCKER_SSH_HOST"
+	[ -z "$NAME" ] && error "Missing project name env NAME. Are you in a project? Have you run a totally init?" 
+	(( ERRORS > 0 )) && 
+		die "Add missing envs to a .totally file either in your home directory, or project directories."
+}
+
+function configure() {
+	log Sourcing user defaults from ~/.totally
+	source ~/.totally
+	configuration_walk $PWD
+	validate_configuration
+}
+
+function deploy() {
+	configure
+	echo deploying $NAME to $DOCKER_SSH_HOST
+	# rsync build
+	# build new image
+	# stop existing container
+	# start new container
+}
+
+while true; do
+	CMD=$1
+	[ -z "$CMD" ] && exit 0
+	shift
+
+	case $CMD in
+		"--verbose") 
+			function log() { echo $@ >&2; }
+			log increased verbosity ;;
+		"deploy") deploy $@;;
+		"init") init $@;;
+	 	"stop") echo whatever bro ;;
+	 	*) usage; exit 1 ;;
+	esac
+done
