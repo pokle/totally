@@ -26,28 +26,23 @@ function cmd_verbose() {
 }
 
 function usage() {
-	cat <<-USAGE >&2
+	cat <<-USAGE  >&2 
 	usage: $0 COMMANDS
 	
 	Main commands:
-
-	.	init	Initialise a new project named after the current directory
-	.	run 	Builds a Docker image for your app, and runs it.
+	-	init	Initialise a new project named after the current directory
+	-	run 	Builds a Docker image for your app, and runs it
 
 	Troubleshooting commands:
-
-	.	log     Tails the console, as well as any additional log files specified
+	-	logs     Tails the console- Hit ^C to stop it
+	-	restart  Restarts the container ignoring errors with stopping
+	- 	inspect  Shows you information about your container
+	- 	top 	 Shows running processes  
 
 	Auxilliary commands:
+	-	verbose Turn on some extra logging
+	-	build   Builds a Docker image for your project
 
-	.	verbose Turn on some extra logging
-	.	build   Builds a Docker image for your project
-
-	.	# Coming soon:
-	.	# stop    Stops your container - you don't lose data
-	.	# start	Starts your container - starts a stopped container
-	.	# remove  Removes your container (not your image)
-	.	# restart Restarts the container ignoring errors with stopping
 
 	USAGE
 	exit 1
@@ -116,17 +111,16 @@ function build_image() {
 
 function restart_container() {
 	ssh $DOCKER_SSH_HOST <<-HERE
-	echo "restarting $CONTAINER"	
-	set -x
-	docker stop "$CONTAINER"
-	docker rm "$CONTAINER"
-	docker run --name "$CONTAINER" -d $IMAGE
-	docker logs "$CONTAINER"
+		echo "restarting $CONTAINER"	
+		set -x
+		docker stop "$CONTAINER"
+		docker rm "$CONTAINER"
+		docker run --name "$CONTAINER" -d $IMAGE
+		docker logs "$CONTAINER"
 	HERE
 }
 
 function cmd_build() {
-	configure
 	echo building Docker image called $IMAGE on $DOCKER_SSH_HOST
 
 	sync_up
@@ -134,7 +128,6 @@ function cmd_build() {
 }
 
 function cmd_run() {
-	configure
 	echo running $NAME \($LOCAL_ROOT\) to $DOCKER_SSH_HOST:$REMOTE_ROOT
 	
 	sync_up
@@ -143,17 +136,14 @@ function cmd_run() {
 }
 
 function cmd_logs() {
-	configure
 	ssh $DOCKER_SSH_HOST "echo Tailing logs for $CONTAINER. Hit ^C to stop; docker logs --follow $CONTAINER"	
 }
 
 function cmd_inspect() { 
-	configure
 	ssh $DOCKER_SSH_HOST "docker inspect $CONTAINER"
 }
 
 function cmd_top() { 
-	configure
 	ssh $DOCKER_SSH_HOST "docker top $CONTAINER"
 }
 
@@ -163,6 +153,8 @@ function command_loop() {
 	if [ -z "$1" ]; then
 		usage
 	fi
+
+	configure
 
 	while true; do
 		CMD=$1
