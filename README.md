@@ -1,9 +1,11 @@
 Totally
 =======
 
-Totally helps you rapidly deploy your apps to a Docker host. It works in a way that's amenable to continuous delivery. When you want to have the quickest feedback loop from code change to seeing your changes running. 
+Totally helps you rapidly deploy your apps to a Docker host. 
 
-Totally also tunnels ports from your container running in the cloud to your laptop, so that you can quickly develop your apps.
+It works in a way that's amenable to continuous delivery. When you want to have the quickest feedback loop from code change to seeing your changes running. 
+
+Totally also tunnels ports from your container running in the cloud to your laptop, so that you can quickly develop your apps. All that Totally needs is ssh access to a host running docker.
 
 Pre-requisites
 --------------
