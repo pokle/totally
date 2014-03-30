@@ -33,7 +33,7 @@ function die() {
 
 function log() {
 	# Log turned off by default
-	# use --verbose to turn on logging
+	# use the verbose command to turn on logging
 	:
 }
 
