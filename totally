@@ -30,8 +30,9 @@ function usage() {
 	usage: $0 COMMANDS
 	
 	Main commands:
-	-	init	Initialise a new project named after the current directory
-	-	run 	Builds a Docker image for your app, and runs it
+	-	init		Initialise a new project named after the current directory
+	-	run 		Builds a Docker image for your app, and runs it
+	-   tunnel      Tunnels all container ports to your laptop
 
 	Troubleshooting commands:
 	-	config 	 Show Totally configuration
@@ -57,6 +58,7 @@ function cmd_init() {
 		NAME="$name"
 		IMAGE="\$NAME:latest"
 		CONTAINER="\$USER-\$NAME"
+		TUNNEL_PORT=12000
 	HERE
 	echo Initialised new Totally project called $name
 }
@@ -91,9 +93,10 @@ function validate() {
 
 function cmd_config() {
 	cat <<-HERE
-		# Project name
+		# Project
 		NAME=$NAME
 		LOCAL_ROOT=$LOCAL_ROOT
+		TUNNEL_PORT=$TUNNEL_PORT
 
 		# Docker
 		IMAGE=$IMAGE
@@ -112,7 +115,9 @@ function configure() {
 	log Overriding with project overrides recursively till /
 	configuration_walk $PWD
 
-	if [ -z "$REMOTE_ROOT" ]; then REMOTE_ROOT=totally-build; fi
+	# Defaults
+	REMOTE_ROOT=${REMOTE_ROOT:-totally-build}
+	TUNNEL_PORT=${TUNNEL_PORT:-20000}
 
 	validate
 }
@@ -133,22 +138,23 @@ function restart_container() {
 		docker stop "$CONTAINER"
 		docker rm "$CONTAINER"
 		docker run --name "$CONTAINER" -d $IMAGE
-		docker logs "$CONTAINER"
+		docker logs "$CONTAINER" &&
+			echo --- Started. Run totally logs to watch the startup process ---
 	HERE
 }
 
 function cmd_build() {
 	echo building Docker image called $IMAGE on $DOCKER_SSH_HOST
 
-	sync_up
+	sync_up &&
 	build_image
 }
 
 function cmd_run() {
 	echo running $NAME \($LOCAL_ROOT\) to $DOCKER_SSH_HOST:$REMOTE_ROOT
 	
-	sync_up
-	build_image
+	sync_up &&
+	build_image &&
 	restart_container
 }
 
@@ -166,18 +172,33 @@ function cmd_top() {
 
 function cmd_man() { :; }
 
+function cmd_tunnel() {
+	local container_ip=$(ssh $DOCKER_SSH_HOST "docker inspect --format='{{.NetworkSettings.IPAddress}}' $CONTAINER")
+	local container_ports=$(ssh $DOCKER_SSH_HOST "docker inspect --format='{{range \$p,\$c := .NetworkSettings.Ports}}{{\$p}},{{end}}' $CONTAINER | sed 's/\/tcp,/ /g'")
+	local container_port
+	local tunnels
+	for container_port in $container_ports; do
+		echo Tunneling from localhost:$TUNNEL_PORT to $container_ip:$container_port. Is it HTTP? http://localhost:$TUNNEL_PORT/
+		tunnels="$tunnels -L $((TUNNEL_PORT++)):$container_ip:$container_port"
+	done
+
+	ssh $tunnels $DOCKER_SSH_HOST 'echo Press ^C to close tunnel; sleep 3600'
+}
+
 function command_loop() {
 	if [ -z "$1" ]; then
 		usage
 	fi
 
+	# init needs to run before configure
+	if [ "init" = "$1" ]; then
+		cmd_init
+		shift
+	fi
+
 	configure
 
-	while true; do
-		CMD=$1
-		[ -z "$CMD" ] && exit 0
-		shift
-
+	for CMD in $@; do
 		if [ "$( type -t cmd_$CMD )" = "function" ]; then
 			cmd_$CMD || die "Oops! $CMD exited with $?"
 		else
