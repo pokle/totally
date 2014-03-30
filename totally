@@ -159,7 +159,15 @@ function cmd_run() {
 }
 
 function cmd_logs() {
-	ssh $DOCKER_SSH_HOST "echo Tailing logs for $CONTAINER. Hit ^C to stop; docker logs --follow $CONTAINER"	
+	ssh $DOCKER_SSH_HOST <<-HERE
+		echo Tailing logs for $CONTAINER. Hit ^C to stop
+		while true; do
+			docker logs --follow $CONTAINER 
+			echo
+			echo -- restarting totally logs at $(date) ------ Hit ^C to stop -----------
+			sleep 2
+		done
+	HERE
 }
 
 function cmd_inspect() { 
