@@ -29,30 +29,41 @@ Install
 Examples
 --------
 
-1. Create a sample web app.
+1. Create a minimilisty web app that doesn't do much
 
-Create a Dockerfile with:
+			$ mkdir totally-hi
+			$ cd totally-hi
+			$ totally init
+			Initialised new Totally project called totally-hi
+	
+	That just creates a shell file that you can add additional commands to later:
 
-	FROM tianon/centos:6.5
-	ADD . /app
-	WORKDIR /app
-	EXPOSE 8000
-	CMD python -m SimpleHTTPServer 8000
+			$ cat .totally 
+			NAME="totally-hi"
 
-And a little helpful index.html file in the same directory
+	Since this is meant to be a demo, lets create a simple python web app.
 
-	It worked!
-	This image was built from this <a href="Dockerfile">Dockerfile</a>
+	Create a _Dockerfile_ with:
+
+			FROM tianon/centos:6.5
+			ADD . /app
+			WORKDIR /app
+			EXPOSE 8000
+			CMD python -m SimpleHTTPServer 8000
+
+	And a little helpful _index.html_ file in the same directory:
+
+			It worked!
+			This image was built from this <a href="Dockerfile">Dockerfile</a>
+
+	Try running it locally to see what it does if you like:
+
+			$ python -m SimpleHTTPServer 8000
 
 2. Now deploy It
 
-	$ totally deploy my-fancy-app
-	# Uploading...
-	# Building...
-	# Running my fancy app on X.X.X.X
-	# Ready.
-	# You can connect to it on localhost at:
-	PORT_80=PPPPP
+		$ totally deploy
+		...
 
-	$ totally stop my-fancy-app
+	When ready, your app should be running on your Docker host
 
