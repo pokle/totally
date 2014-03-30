@@ -89,6 +89,22 @@ function validate() {
 		die "Add missing envs to a .totally file either in your home directory, or project directory."
 }
 
+function cmd_config() {
+	cat <<-HERE
+		# Project name
+		NAME=$NAME
+		LOCAL_ROOT=$LOCAL_ROOT
+
+		# Docker
+		IMAGE=$IMAGE
+		CONTAINER=$CONTAINER
+
+		# Docker host
+		DOCKER_SSH_HOST=$DOCKER_SSH_HOST
+		REMOTE_ROOT=$REMOTE_ROOT
+	HERE
+}
+
 function configure() {
 	log Sourcing user defaults from ~/.totally
 	source ~/.totally
@@ -150,22 +166,6 @@ function cmd_top() {
 
 function cmd_man() { :; }
 
-function cmd_config() {
-	cat <<-HERE
-		# Project name
-		NAME=$NAME
-		LOCAL_ROOT=$LOCAL_ROOT
-
-		# Docker
-		IMAGE=$IMAGE
-		CONTAINER=$CONTAINER
-
-		# Docker host
-		DOCKER_SSH_HOST=$DOCKER_SSH_HOST
-		REMOTE_ROOT=$REMOTE_ROOT
-	HERE
-}
-
 function command_loop() {
 	if [ -z "$1" ]; then
 		usage
@@ -178,7 +178,7 @@ function command_loop() {
 		[ -z "$CMD" ] && exit 0
 		shift
 
-		if [ $( type -t cmd_$CMD ) = "function" ]; then
+		if [ "$( type -t cmd_$CMD )" = "function" ]; then
 			cmd_$CMD || die "Oops! $CMD exited with $?"
 		else
 			error Sorry, no such command $CMD
