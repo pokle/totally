@@ -82,7 +82,16 @@ function sync_up() {
 }
 
 function build_image() {
-	ssh $DOCKER_SSH_HOST "cd $REMOTE_ROOT/$NAME; echo building $NAME in \$HOSTNAME:\$PWD; docker build -t $NAME ."
+	ssh $DOCKER_SSH_HOST "cd $REMOTE_ROOT/$NAME && echo building $NAME in \$HOSTNAME:\$PWD; docker build -t $NAME ."
+}
+
+function restart_container() {
+	ssh $DOCKER_SSH_HOST <<-HERE
+	echo "restarting $NAME"
+	docker stop "$NAME"
+	docker rm "$NAME"
+	docker run --name "$NAME" -d $NAME
+	HERE
 }
 
 function deploy() {
@@ -91,9 +100,7 @@ function deploy() {
 	
 	sync_up
 	build_image
-	
-	# stop existing container
-	# start new container
+	restart_container
 }
 
 
