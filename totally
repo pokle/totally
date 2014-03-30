@@ -13,8 +13,9 @@ function die() {
 }
 
 function log() {
-	echo -n
-	# use --verbose
+	# Log turned off by default
+	# use --verbose to turn on logging
+	:
 }
 
 function usage() {
@@ -70,6 +71,10 @@ function deploy() {
 	# start new container
 }
 
+if [ -z "$1" ]; then
+	usage
+fi
+
 while true; do
 	CMD=$1
 	[ -z "$CMD" ] && exit 0
@@ -82,6 +87,6 @@ while true; do
 		"deploy") deploy $@;;
 		"init") init $@;;
 	 	"stop") echo whatever bro ;;
-	 	*) usage; exit 1 ;;
+	 	*) usage ;;
 	esac
 done
