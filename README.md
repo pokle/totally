@@ -64,7 +64,7 @@ Examples
 
 2. Now deploy It
 
-		$ totally deploy
+		$ totally run
 		...
 
 	When ready, your app should be running on your Docker host
