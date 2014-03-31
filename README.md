@@ -25,7 +25,7 @@ Pre-requisites
 Install
 -------
 
-		sudo curl https://github.com/pokle/totally/blob/master/totally -o /usr/local/bin/totally
+		sudo curl https://raw.githubusercontent.com/pokle/totally/master/totally -o /usr/local/bin/totally
 		sudo chmod a+rx /usr/local/bin/totally
 
 Examples
@@ -62,10 +62,10 @@ Examples
 
 			$ python -m SimpleHTTPServer 8000
 
-2. Now deploy It
+2. Now run it
 
 		$ totally run
 		...
 
-	When ready, your app should be running on your Docker host
+3. You might want to tunnel to your 
 
