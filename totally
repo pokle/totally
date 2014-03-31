@@ -119,7 +119,7 @@ function validate() {
     [ ! -f "$LOCAL_ROOT/Dockerfile" ] && error "Missing a Dockerfile at $LOCAL_ROOT. I wouldn't know how to run your app without it."
 
     (( ERRORS > 0 )) && 
-        die "Add missing envs to a .totally file either in your home directory, or project directory."
+        die "Perhaps did you forget to run totally init?"
 }
 
 function cmd_config() {
@@ -140,10 +140,10 @@ function cmd_config() {
 }
 
 function configure() {
-    log Sourcing user defaults from ~/.totally
-    source ~/.totally
+    if [ -r ~/.totally ]; then 
+        source ~/.totally
+    fi
     
-    log Overriding with project overrides recursively till /
     configuration_walk $PWD
 
     # Defaults

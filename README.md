@@ -1,15 +1,16 @@
 Totally
 =======
 
-![Circle CI build status](https://circleci.com/gh/pokle/totally/tree/master.png?circle-token=aaebe5e4a9e39b0e2000d5515128ce8dffba31a3)
-
-![TravisCI build status](https://travis-ci.org/pokle/totally.svg)
-
 Totally helps you rapidly deploy your apps to a Docker host. 
 
 It works in a way that's amenable to continuous delivery. When you want to have the quickest feedback loop from code change to seeing your changes running. 
 
 Totally also tunnels ports from your container running in the cloud to your laptop, so that you can quickly develop your apps. All that Totally needs is ssh access to a host running docker.
+
+![Circle CI build status](https://circleci.com/gh/pokle/totally/tree/master.png?circle-token=aaebe5e4a9e39b0e2000d5515128ce8dffba31a3)
+
+[![Build Status](https://travis-ci.org/pokle/totally.svg?branch=master)](https://travis-ci.org/pokle/totally)
+
 
 Pre-requisites
 --------------
