@@ -1,6 +1,4 @@
 language: bash
 install:
-	- git clone https://github.com/sstephenson/bats.git
-	- cd bats
-	- ./install.sh /usr/local
-script: ./scripts/test
+	- git clone https://github.com/sstephenson/bats.git /tmp/bats
+script: /tmp/bats/bin/bats test/*.bats
