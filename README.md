@@ -1,6 +1,10 @@
 Totally
 =======
 
+![Circle CI build status](https://circleci.com/gh/pokle/totally/tree/master.png?circle-token=aaebe5e4a9e39b0e2000d5515128ce8dffba31a3)
+
+
+
 Totally helps you rapidly deploy your apps to a Docker host. 
 
 It works in a way that's amenable to continuous delivery. When you want to have the quickest feedback loop from code change to seeing your changes running. 
@@ -28,13 +32,17 @@ Install
 		sudo curl https://raw.githubusercontent.com/pokle/totally/master/totally -o /usr/local/bin/totally
 		sudo chmod a+rx /usr/local/bin/totally
 
-Examples
+Guide
 --------
 
-1. Create a minimilisty web app that doesn't do much
+1. Create a minimalist Hello World web app
 
 			$ mkdir totally-hi
 			$ cd totally-hi
+
+
+
+
 			$ totally init
 			Initialised new Totally project called totally-hi
 	
