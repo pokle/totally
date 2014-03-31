@@ -3,7 +3,7 @@ Totally
 
 ![Circle CI build status](https://circleci.com/gh/pokle/totally/tree/master.png?circle-token=aaebe5e4a9e39b0e2000d5515128ce8dffba31a3)
 
-
+![TravisCI build status](https://travis-ci.org/pokle/totally.svg)
 
 Totally helps you rapidly deploy your apps to a Docker host. 
 
