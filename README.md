@@ -27,7 +27,13 @@ Install
 On Mac OS X
 
 	brew tap pokle/docker
+	
+	# Install the latest stable
 	brew install totally
+	
+	# Or the bleeding edge
+	brew install --HEAD  totally
+	
 
 On other Unix like systems, you need to simply install the totally script in somewhere in your $PATH such as /usr/local/bin
 
