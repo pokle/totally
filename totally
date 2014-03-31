@@ -78,6 +78,19 @@ function cmd_init() {
 		CONTAINER="\$USER-\$NAME"
 		TUNNEL_PORT=12000
 	HERE
+
+    if [ ! -f "Dockerfile" ]; then
+        log "Creating a basic Dockerfile - please edit"
+        cat >Dockerfile <<-HERE
+			FROM busybox
+			ADD . /app
+			WORKDIR /app
+			EXPOSE 8000
+			CMD python -m SimpleHTTPServer 8000
+		HERE
+    fi
+
+
     echo Initialised new Totally project called $name
 }
 
