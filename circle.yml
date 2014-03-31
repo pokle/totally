@@ -1,13 +1,6 @@
-machine:
-  timezone:
-    Australia/Melbourne
-
 dependencies:
   pre:
     - git clone https://github.com/sstephenson/bats.git /tmp/bats
-    - cd /tmp/bats && sudo ./install.sh /usr/local
-
 test:
   override:
-    - ./scripts/test
-
+    - /tmp/bats/bin/bats tests/*.bats
