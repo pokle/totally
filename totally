@@ -20,23 +20,12 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
+#
+# Logging, error handling
 ((ERRORS=0))
-function error() {
-	echo $@ >&2
-	((ERRORS++))
-}
-
-function die() {
-	error $@
-	exit 1
-}
-
-function log() {
-	# Log turned off by default
-	# use the verbose command to turn on logging
-	:
-}
-
+function error() { ((ERRORS++)); echo ERROR: $@ >&2; }
+function die() { error $@; exit 1; }
+function log() { :; } # Turned off by default - use the verbose command to turn on
 function cmd_verbose() {
 	function log() { echo $@ >&2; }
 	set -x
@@ -48,9 +37,9 @@ function usage() {
 	usage: $0 COMMANDS
 	
 	Main commands:
-	-	init		Initialise a new project named after the current directory
-	-	run 		Builds a Docker image for your app, and runs it
-	-   tunnel      Tunnels all container ports to your laptop
+	-	init		Creates a new project in the current directory
+	-	run 		Builds and runs your app on the DOCKER_SSH_HOST
+	-	tunnel      Tunnels all app's exposed ports to your computer
 
 	Troubleshooting commands:
 	-	config 	 Show Totally configuration
@@ -63,7 +52,14 @@ function usage() {
 	-	verbose Turn on some extra logging
 	-	build   Builds a Docker image for your project
 
+	Configuration:
 
+	-	NAME 			Your project name
+	-	DOCKER_SSH_HOST	A host to build and run your app on
+	- 	REMOTE_ROOT		The temp. dir. on DOCKER_SSH_HOST to build in
+	-	TUNNEL_PORT		A base port number for your tunnels
+	-	IMAGE 			The name of the Docker image that will be built
+	-	CONTAINER 		The name of the Docker container to run your app as
 	USAGE
 	exit 1
 }
