@@ -24,9 +24,12 @@ Pre-requisites
 
 Install
 -------
+On Mac OS X
 
-		sudo curl https://raw.githubusercontent.com/pokle/totally/master/totally -o /usr/local/bin/totally
-		sudo chmod a+rx /usr/local/bin/totally
+	brew tap pokle/docker
+	brew install totally
+
+On other Unix like systems, you need to simply install the totally script in somewhere in your $PATH such as /usr/local/bin
 
 Guide
 --------
