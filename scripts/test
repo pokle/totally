@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+cd $(dirname $0)/../tests
+
+function die() { echo $@; exit 1; }
+
+which bats >/dev/null || die Please install Bats - brew install bats - https://github.com/sstephenson/bats 
+
+bats *.bats
