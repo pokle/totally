@@ -7,11 +7,6 @@ It works in a way that's amenable to continuous delivery. When you want to have 
 
 Totally also tunnels ports from your container running in the cloud to your laptop, so that you can quickly develop your apps. All that Totally needs is ssh access to a host running docker.
 
-![Circle CI build status](https://circleci.com/gh/pokle/totally/tree/master.png?circle-token=aaebe5e4a9e39b0e2000d5515128ce8dffba31a3)
-
-[![Build Status](https://travis-ci.org/pokle/totally.svg?branch=master)](https://travis-ci.org/pokle/totally)
-
-
 Pre-requisites
 --------------
 1. A host running Docker that you can ssh to without having to type in a password (with your key set up). Totally will ssh to the box, and expect to be able to connect to Docker on it.
@@ -40,10 +35,6 @@ Guide
 
 			$ mkdir totally-hi
 			$ cd totally-hi
-
-
-
-
 			$ totally init
 			Initialised new Totally project called totally-hi
 	
@@ -75,6 +66,27 @@ Guide
 
 		$ totally run
 		...
+		--- Started. Run totally logs to watch the startup process ---
 
-3. You might want to tunnel to your 
+
+	That will build a Docker image, and then run a new container with it. Repeat as many times as you like.
+
+3. To get to your app, you might want to use a tunnel
+
+		$ totally tunnel
+		Tunneling localhost:12000 => my-super-docker-fragalistic => 172.17.0.2:8000. Got HTTP? http://localhost:12000/
+		Press ^C to close tunnel
+
+	At that point, you can point your browser at the tunnel URL displayed, and away you go!
+
+
+Contributing
+------------
+
+Please fork the project, have a play with your changes, and get in touch with me, or send me a pull request! Easy.
+
+![Circle CI build status](https://circleci.com/gh/pokle/totally/tree/master.png?circle-token=aaebe5e4a9e39b0e2000d5515128ce8dffba31a3)
+
+[![Build Status](https://travis-ci.org/pokle/totally.svg?branch=master)](https://travis-ci.org/pokle/totally)
+
 
