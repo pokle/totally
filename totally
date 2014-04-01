@@ -39,22 +39,26 @@ function usage() {
 		Main commands
 		-------------
 		 init        Creates a new project in the current directory
-		 run         Builds and runs your app on the DOCKER_SSH_HOST
+		 run         Builds and restarts your app
+		 interactive Like run, but lets you interact with the container
+		 			 For eg.: 'totally interactive bash' runs bash in the
+		 			 container to override the CMD in your Dockerfile
 		 tunnel      Tunnels all app's exposed ports to your computer
 
 		Troubleshooting commands
 		------------------------
 		 config       Show Totally configuration
-		 logs         Tails the console- Hit ^C to stop it
-		 restart      Restarts the container ignoring errors with stopping
+		 logs         Tails the console
+		 destroy      Stops the container, and deletes it - losing data
+		 restart      Destroys and starts the container with the latest image
 		 inspect ARGS Shows you information about your container
 		 top          Shows running processes  
 		 ps 	      Same as top
 
 		Auxilliary commands
 		-------------------
-		 verbose Turn on some extra logging
-		 build   Builds a Docker image for your project
+		 verbose 	  For eg. a verbose build: 'totally verbose build'
+		 build   	  Builds a Docker image
 
 		Configuration
 		-------------
@@ -166,45 +170,53 @@ function configure() {
 #
 
 
-function sync_up() {
+function cmd_sync() {
+    echo -- Sync\'ing to $DOCKER_SSH_HOST
     ssh $DOCKER_SSH_HOST "mkdir -p '$REMOTE_ROOT'"
     rsync --archive --delete $LOCAL_ROOT/ $DOCKER_SSH_HOST:$REMOTE_ROOT/$NAME/
 }
 
-function build_image() {
-    ssh $DOCKER_SSH_HOST "cd $REMOTE_ROOT/$NAME && echo building $IMAGE in \$HOSTNAME:\$PWD; docker build -t $IMAGE ."
+function cmd_destroy() {
+     ssh -t $DOCKER_SSH_HOST "
+        function container_exists() { docker inspect --format '.' $CONTAINER > /dev/null 2>&1; }
+
+        container_exists &&
+            echo -n 'Stopping ' && 
+            docker stop $CONTAINER &&
+            echo -n 'Removing ' &&
+            docker rm $CONTAINER" &&
+    echo -- Destroyed $CONTAINER
 }
 
-function restart_container() {
-    ssh $DOCKER_SSH_HOST "
-		function container_exists() { docker inspect --format '.' $CONTAINER > /dev/null 2>&1; }
+function cmd_restart() {
 
-		container_exists &&
-			echo -n 'Stopping ' && 
-			docker stop $CONTAINER &&
- 			echo -n 'Removing ' &&
-			docker rm $CONTAINER
+    cmd_destroy  # Best effort. Don't care if it fails
 
-		echo -n 'Running '
+    ssh -t $DOCKER_SSH_HOST "
+		echo -n '-- Running $CONTAINER id '
 		docker run --name $CONTAINER -d $IMAGE &&
-	    echo --- Started. Run totally logs to watch the startup process ---
+	    echo -- SUCCESS. Run 'totally logs' to watch startup
 	"
 }
 
 function cmd_build() {
-    echo building Docker image called $IMAGE on $DOCKER_SSH_HOST
-
-    sync_up &&
-    build_image
+    cmd_sync &&
+    echo -- Building Docker image called $IMAGE on $DOCKER_SSH_HOST &&
+    ssh $DOCKER_SSH_HOST "cd $REMOTE_ROOT/$NAME && docker build -t $IMAGE ." &&
+    echo -- Build successful
 }
 
 function cmd_run() {
-    echo running $NAME \($LOCAL_ROOT\) to $DOCKER_SSH_HOST:$REMOTE_ROOT
-    
-    sync_up &&
-    build_image &&
-    restart_container
+    cmd_build &&
+    cmd_restart
 }
+
+function cmd_interactive() {
+	cmd_build &&
+    ssh -t $DOCKER_SSH_HOST "docker run --rm -i -t $IMAGE $@"
+    exit $? # No more commands allowed, because we consume $@
+}
+
 
 
 #
@@ -213,12 +225,12 @@ function cmd_top()  { ssh $DOCKER_SSH_HOST "docker top $CONTAINER"; }
 function cmd_ps() { cmd_top; }
 function cmd_inspect() { 
     ssh $DOCKER_SSH_HOST docker inspect $@ $CONTAINER; 
-    exit 0 # No more commands allowed, because we consume $@
+    exit $? # No more commands allowed, because we consume $@
 }
 
 function cmd_logs() {
     ssh $DOCKER_SSH_HOST "
-        echo Tailing logs for $CONTAINER. Hit ^C to stop
+        echo -- Tailing logs for $CONTAINER. Hit ^C to stop
         while true; do
             docker logs --follow $CONTAINER 
             echo
@@ -234,21 +246,25 @@ function cmd_man() { :; }
 function cmd_tunnel() {
     local container_ip=$(ssh $DOCKER_SSH_HOST "docker inspect --format='{{.NetworkSettings.IPAddress}}' $CONTAINER")
     [ -z "$container_ip" ] && 
-        die "Can't get the IP address of your container. Is it running?"
+        die "-- Can't get the IP address of your container. Is it running?"
 
     local container_ports=$(ssh $DOCKER_SSH_HOST "docker inspect --format='{{range \$p,\$c := .NetworkSettings.Ports}}{{\$p}},{{end}}' $CONTAINER | sed 's/\/tcp,/ /g'")
     [ -z "$container_ports" ] &&
-        die "Sorry, no TCP container ports were found. Did you EXPOSE ports in your Dockerfile?"
+        die "-- Sorry, no TCP container ports were found. Did you EXPOSE ports in your Dockerfile?"
 
     local container_port
     local tunnels
 
     for container_port in $container_ports; do
-        echo "Tunneling localhost:$TUNNEL_PORT => $DOCKER_SSH_HOST => $container_ip:$container_port. Got HTTP? http://localhost:$TUNNEL_PORT/"
+        echo "-- Tunneling localhost:$TUNNEL_PORT => $DOCKER_SSH_HOST => $container_ip:$container_port. Got HTTP? http://localhost:$TUNNEL_PORT/"
         tunnels="$tunnels -L $((TUNNEL_PORT++)):$container_ip:$container_port"
     done
 
-    ssh $tunnels $DOCKER_SSH_HOST 'echo Press ^C to close tunnel; sleep 3600'
+    ssh $tunnels $DOCKER_SSH_HOST 'echo -- Press ^C to close tunnel; sleep 3600'
+}
+
+function is_function() {
+    [ "$( type -t $1 )" = "function" ]
 }
 
 function is_function() {
