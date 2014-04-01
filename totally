@@ -86,16 +86,11 @@ function usage() {
 function cmd_init() {
     [ -f .totally ] && die "This directory has already been initialised. 'cat .totally' to see your project."
 
-    local name=$(basename $PWD)
-    cat > .totally <<-HERE
-		NAME="$name"
-		IMAGE="\$NAME:latest"
-		CONTAINER="\$USER-\$NAME"
-		TUNNEL_PORT=12000
-	HERE
+    local BUILD_DIR=$(find . -name Dockerfile | head -1 | xargs dirname)
 
-    if [ ! -f "Dockerfile" ]; then
-        log "Creating a basic Dockerfile - please edit"
+    if [ -z "$BUILD_DIR" ]; then
+        BUILD_DIR=.
+        log "Creating a quick start Dockerfile - please edit"
         cat >Dockerfile <<-HERE
 			FROM tianon/centos:6.5
 			ADD . /app
@@ -105,8 +100,17 @@ function cmd_init() {
 		HERE
     fi
 
+    local name=$(basename $PWD)
+    cat > .totally <<-HERE
+		NAME="$name"
+		BUILD_DIR="$BUILD_DIR"
+		IMAGE="\$NAME:latest"
+		CONTAINER="\$USER-\$NAME"
+		TUNNEL_PORT=12000
+	HERE
 
     echo Initialised new Totally project called $name
+    exit 0
 }
 
 # Recurses up from the current directory all the way to the root
@@ -129,9 +133,9 @@ function validate() {
     [ -z "$DOCKER_SSH_HOST" ] && error "Missing docker host name env DOCKER_SSH_HOST"
     [ -z "$NAME" ] && error "Missing project name env: NAME" 
     [ -z "$IMAGE" ] && error "Missing Docker image env: IMAGE" 
-    [ -z "$CONTAINER" ] && error "Missing Docker container name env: CONTAINER" 
+    [ -z "$CONTAINER" ] && error "Missing Docker container name env: CONTAINER"
 
-    [ ! -f "$LOCAL_ROOT/Dockerfile" ] && error "Missing a Dockerfile at $LOCAL_ROOT. I wouldn't know how to run your app without it."
+    [ ! -f "$LOCAL_ROOT/$BUILD_DIR/Dockerfile" ] && error "Missing a Dockerfile at $LOCAL_ROOT/$BUILD_DIR."
 
     (( ERRORS > 0 )) && 
         die "Perhaps did you forget to run totally init?"
@@ -141,7 +145,7 @@ function cmd_config() {
     cat <<-HERE
 		# Project
 		NAME=$NAME
-		LOCAL_ROOT=$LOCAL_ROOT
+		BUILD_DIR=$BUILD_DIR
 		TUNNEL_PORT=$TUNNEL_PORT
 
 		# Docker
@@ -164,6 +168,7 @@ function configure() {
     # Defaults
     REMOTE_ROOT=${REMOTE_ROOT:-totally-build}
     TUNNEL_PORT=${TUNNEL_PORT:-20000}
+    BUILD_DIR=${BUILD_DIR:-.}
 
     validate
 }
@@ -176,7 +181,7 @@ function configure() {
 function cmd_sync() {
     echo -- Sync\'ing to $DOCKER_SSH_HOST
     ssh $DOCKER_SSH_HOST "mkdir -p '$REMOTE_ROOT'"
-    rsync --archive --delete $LOCAL_ROOT/ $DOCKER_SSH_HOST:$REMOTE_ROOT/$NAME/
+    rsync --archive --delete $LOCAL_ROOT/$BUILD_DIR/ $DOCKER_SSH_HOST:$REMOTE_ROOT/$NAME/
 }
 
 function cmd_destroy() {
