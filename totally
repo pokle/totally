@@ -34,8 +34,8 @@ function cmd_verbose() {
 
 function usage() {
     cat <<-USAGE  >&2 
-		usage: $0 COMMANDS
-		
+		usage: $0 COMMAND...
+
 		Main commands
 		-------------
 		 init        Creates a new project in the current directory
@@ -44,12 +44,12 @@ function usage() {
 
 		Troubleshooting commands
 		------------------------
-		 config   Show Totally configuration
-		 logs     Tails the console- Hit ^C to stop it
-		 restart  Restarts the container ignoring errors with stopping
-		 inspect  Shows you information about your container
-		 top      Shows running processes  
-		 ps 	  Same as top
+		 config       Show Totally configuration
+		 logs         Tails the console- Hit ^C to stop it
+		 restart      Restarts the container ignoring errors with stopping
+		 inspect ARGS Shows you information about your container
+		 top          Shows running processes  
+		 ps 	      Same as top
 
 		Auxilliary commands
 		-------------------
@@ -64,6 +64,14 @@ function usage() {
 		 TUNNEL_PORT     A base port number for your tunnels
 		 IMAGE           The name of the Docker image that will be built
 		 CONTAINER       The name of the Docker container to run your app as
+
+		Chaining commands
+		-----------------
+		Most commands can be chained. Eg. 'totally run logs' runs your app, and
+		then tails the logs. Commands that take arguments like inspect can be
+		chained only if they are the last command called. 
+		For eg. totally run inspect --format '{{.NetworkSettings.IPAddress}}'
+
 	USAGE
     exit 1
 }
@@ -203,7 +211,10 @@ function cmd_run() {
 # Troubleshooting commands
 function cmd_top()  { ssh $DOCKER_SSH_HOST "docker top $CONTAINER"; }
 function cmd_ps() { cmd_top; }
-function cmd_inspect() { ssh $DOCKER_SSH_HOST "docker inspect $CONTAINER"; }
+function cmd_inspect() { 
+    ssh $DOCKER_SSH_HOST docker inspect $@ $CONTAINER; 
+    exit 0 # No more commands allowed, because we consume $@
+}
 
 function cmd_logs() {
     ssh $DOCKER_SSH_HOST "
@@ -240,12 +251,14 @@ function cmd_tunnel() {
     ssh $tunnels $DOCKER_SSH_HOST 'echo Press ^C to close tunnel; sleep 3600'
 }
 
-function command_loop() {
-    if [ -z "$1" ]; then
-        usage
-    fi
+function is_function() {
+    [ "$( type -t $1 )" = "function" ]
+}
 
-    # init needs to run before configure
+function command_loop() {
+    [ $# = 0 ] && usage
+
+    # init needs to run before configure because it bootstraps configure
     if [ "init" = "$1" ]; then
         cmd_init
         shift
@@ -253,9 +266,10 @@ function command_loop() {
 
     configure
 
-    for CMD in $@; do
-        if [ "$( type -t cmd_$CMD )" = "function" ]; then
-            cmd_$CMD || die "Oops! $CMD exited with $?"
+    until [ $# = 0 ]; do
+        CMD=$1; shift
+        if is_function cmd_$CMD; then
+            cmd_$CMD $@ || die "Oops! $CMD exited with $?"
         else
             error Sorry, no such command $CMD
             usage
@@ -263,4 +277,8 @@ function command_loop() {
     done
 }
 
-command_loop $@
+if [ -z "$TOTALLY_TEST_MODE" ]; then
+    command_loop $@
+else
+    true # Required so that the tests can source this file
+fi
