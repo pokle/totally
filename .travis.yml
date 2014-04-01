@@ -1,4 +1,4 @@
 language: bash
 install:
     - git clone https://github.com/sstephenson/bats.git /tmp/bats
-script: bash -c "/tmp/bats/bin/bats tests"
+script: env PATH="/tmp/bats/bin:$PATH" ./scripts/test
