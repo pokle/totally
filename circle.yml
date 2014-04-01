@@ -3,4 +3,4 @@ dependencies:
     - git clone https://github.com/sstephenson/bats.git /tmp/bats
 test:
   override:
-    - /tmp/bats/bin/bats tests/*.bats
+    - /tmp/bats/bin/bats tests
