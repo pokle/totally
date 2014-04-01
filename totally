@@ -168,19 +168,19 @@ function build_image() {
 }
 
 function restart_container() {
-    ssh $DOCKER_SSH_HOST <<-HERE
-		function container_exists() { docker inspect --format '.' "$CONTAINER" > /dev/null 2>&1; }
+    ssh $DOCKER_SSH_HOST "
+		function container_exists() { docker inspect --format '.' $CONTAINER > /dev/null 2>&1; }
 
 		container_exists &&
-			echo -n "Stopping " && 
-			docker stop "$CONTAINER" &&
- 			echo -n "Removing " &&
-			docker rm "$CONTAINER"
+			echo -n 'Stopping ' && 
+			docker stop $CONTAINER &&
+ 			echo -n 'Removing ' &&
+			docker rm $CONTAINER
 
-		echo -n "Running "
-		docker run --name "$CONTAINER" -d $IMAGE &&
+		echo -n 'Running '
+		docker run --name $CONTAINER -d $IMAGE &&
 	    echo --- Started. Run totally logs to watch the startup process ---
-	HERE
+	"
 }
 
 function cmd_build() {
@@ -206,15 +206,15 @@ function cmd_ps() { cmd_top; }
 function cmd_inspect() { ssh $DOCKER_SSH_HOST "docker inspect $CONTAINER"; }
 
 function cmd_logs() {
-    ssh $DOCKER_SSH_HOST <<-HERE
+    ssh $DOCKER_SSH_HOST "
         echo Tailing logs for $CONTAINER. Hit ^C to stop
         while true; do
             docker logs --follow $CONTAINER 
             echo
-            echo -- restarting totally logs at $(date) ------ Hit ^C to stop -----------
+            echo -- Restarting totally logs at $(date) ------ Hit ^C to stop -----------
             sleep 2
         done
-HERE
+    "
 }
 
 # Just so that you can be poetic - 'totally run man'
