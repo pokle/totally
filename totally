@@ -40,9 +40,6 @@ function usage() {
 		-------------
 		 init        Creates a new project in the current directory
 		 run         Builds and restarts your app
-		 interactive Like run, but lets you interact with the container
-		 			 For eg.: 'totally interactive bash' runs bash in the
-		 			 container to override the CMD in your Dockerfile
 		 tunnel      Tunnels all app's exposed ports to your computer
 
 		Troubleshooting commands
@@ -54,6 +51,12 @@ function usage() {
 		 inspect ARGS Shows you information about your container
 		 top          Shows running processes  
 		 ps 	      Same as top
+
+		Ninja commands
+		--------------
+		 interactive ARGS Like run, but drops you into the container.
+		                  Try: totally interactive bash
+		                  Or even: totally build interactive bash
 
 		Auxilliary commands
 		-------------------
@@ -212,7 +215,6 @@ function cmd_run() {
 }
 
 function cmd_interactive() {
-	cmd_build &&
     ssh -t $DOCKER_SSH_HOST "docker run --rm -i -t $IMAGE $@"
     exit $? # No more commands allowed, because we consume $@
 }
