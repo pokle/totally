@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-load test_helper
+load totally_loader
 
 @test "real function" {
 	function foo_abc() { :; }

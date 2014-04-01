@@ -213,7 +213,7 @@ function cmd_top()  { ssh $DOCKER_SSH_HOST "docker top $CONTAINER"; }
 function cmd_ps() { cmd_top; }
 function cmd_inspect() { 
     ssh $DOCKER_SSH_HOST docker inspect $@ $CONTAINER; 
-    exit 0 # No more commands allowed
+    exit 0 # No more commands allowed, because we consume $@
 }
 
 function cmd_logs() {
