@@ -1,4 +1,6 @@
 TOTALLY=$BATS_TEST_DIRNAME/../totally
+TOTALLY_TEST_MODE="yes"
+load totally
 
 function create_test_home() {
 	HOME="$BATS_TMPDIR/home"
