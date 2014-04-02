@@ -9,89 +9,68 @@ It's opinionated software:
 - Rapid feedback of your changes is paramount.
 - Repeatable deployments to all environments builds confidence.
 - You're not done till your users have seen your work.
+- Developing several modular microservices is superior to building a monolith.
+- Rapid change is to be embraced.
 
 It targets applications that will be delivered as Docker images. So it's suited to developing server side software - such as web applications, microservices, etc.
 
+A tour of the workflow
+----------------------
+Say you work for a microcorp, and you've decided to write a new microservice to calculate the price of your widgets. The first thing you would do is create a new cookie-cutter project and get it deployed to a staging environment that is accessible to the consumers of its API.
+
+	$ totally new microcorp/microservice whats-the-price
+	$ cd whats-the-price
+	$ totally run
+	...
+	Running at http://whats-the-price.staging/
+
+That would create a new project using your company's microservice template, and get it running in a staging environment - in no more than 30 seconds.
+
+And then you would lean over your cubicle wall, and say:
+
+_You: Hey Bob, you know you were asking me how to work out the price of widgets? Go check out this API I built for you at http://whats-the-price.staging/_
+
+_Bob: Ummm... So like you said earlier, I should be able to query something like http://whats-the-price.staging/price?product=superior&quantity=64?_
+
+_You: Yeah, give me a minute, I'll add that in._
+
+And then you open up the right file, and add an HTTP GET route for /price, returning a fixed price of $64, and then:
+
+	$ totally run
+	...
+	Running at http://whats-the-price.staging/
+
+_You: Try now Bob._
+
+_Bob: Yes, that works for me. Can it handle a 20% discount for my big customer with say code=BIG?_
+
+_You: Give me a minute._
+
+So you get the picture. Totally does the plumbing using Docker to support a rapid development workflow where you want to get your work running in a production like environment rapidly. 
+
+
 Pre-requisites
 --------------
-1. A host running Docker that you can ssh to without having to type in a password (with your key set up). Totally will ssh to the box, and expect to be able to connect to Docker on it.
+A host running Docker that you can ssh to without having to type in a password (with your key set up). Totally will ssh to the box, and expect to be able to connect to Docker on it.
 
-			echo DOCKER_SSH_HOST=my-super-docker-fragalistic > ~/.totally
+	echo DOCKER_SSH_HOST=my-super-docker-fragalistic > ~/.totally
 
-	If you want to specify ssh ports, users, keys, etc., do it in your ~/.ssh/config file. Here's how I connect to my CoreOS Vagrant VM on my laptop:
+If you want to specify ssh ports, users, keys, etc., do it in your ~/.ssh/config file. Here's how I connect to my CoreOS Vagrant VM on my laptop:
 
-			Host my-super-docker-fragalistic
-				User core
-				IdentityFile ~/.ssh/coreos_insecure_ssh_key
-				HostName 192.168.67.144
+	Host my-super-docker-fragalistic
+		User core
+		IdentityFile ~/.ssh/coreos_insecure_ssh_key
+		HostName 192.168.67.144
 
-2. Install tools on your local computer: rsync
 
 Install
 -------
 On Mac OS X
 
 	brew tap pokle/docker
-	
-	# Install the latest stable
-	brew install totally
-	
-	# Or the bleeding edge
-	brew install --HEAD  totally
-	
+	brew install totally	
 
 On other Unix like systems, you need to simply install the totally script in somewhere in your $PATH such as /usr/local/bin
-
-Guide
---------
-
-1. Create a minimalist Hello World web app
-
-			$ mkdir totally-hi
-			$ cd totally-hi
-			$ totally init
-			Initialised new Totally project called totally-hi
-	
-	That just creates a shell file that you can add additional commands to later:
-
-			$ cat .totally 
-			NAME="totally-hi"
-
-	Since this is meant to be a demo, lets create a simple python web app.
-
-	Create a _Dockerfile_ with:
-
-			FROM tianon/centos:6.5
-			ADD . /app
-			WORKDIR /app
-			EXPOSE 8000
-			CMD python -m SimpleHTTPServer 8000
-
-	And a little helpful _index.html_ file in the same directory:
-
-			It worked!
-			This image was built from this <a href="Dockerfile">Dockerfile</a>
-
-	Try running it locally to see what it does if you like:
-
-			$ python -m SimpleHTTPServer 8000
-
-2. Now run it
-
-		$ totally run
-		...
-		--- Started. Run totally logs to watch the startup process ---
-
-
-	That will build a Docker image, and then run a new container with it. Repeat as many times as you like.
-
-3. To get to your app, you might want to use a tunnel
-
-		$ totally tunnel
-		Tunneling localhost:12000 => my-super-docker-fragalistic => 172.17.0.2:8000. Got HTTP? http://localhost:12000/
-		Press ^C to close tunnel
-
-	At that point, you can point your browser at the tunnel URL displayed, and away you go!
 
 
 Contributing
