@@ -1,6 +1,9 @@
-0.1.0 2014-03-30
+0.3.0 2014-04-02
 ----------------
-- First release through HomeBrew
+- Dockerfiles are now supported in sub directories. 
+- 'totally init' now picks the first Dockerfile it finds.
+- We now have templates
+	- Example: totally new decoupled/microservice fluffy-cats
 
 0.2.0 2014-04-01
 ----------------
@@ -23,3 +26,8 @@
 - Bug fixes
 	- Reduce ssh noise #8 by not sending the script via stdin
 	- tunnel now has better feedback if there are errors with the container
+
+0.1.0 2014-03-30
+----------------
+- First release through HomeBrew
+
