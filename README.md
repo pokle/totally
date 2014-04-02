@@ -1,11 +1,16 @@
 Totally
 =======
 
-Totally helps you rapidly deploy your apps to a Docker host. 
+Totally supports a continuous delivery workflow. 
 
-It works in a way that's amenable to continuous delivery. When you want to have the quickest feedback loop from code change to seeing your changes running. 
+It's opinionated software:
 
-Totally also tunnels ports from your container running in the cloud to your laptop, so that you can quickly develop your apps. All that Totally needs is ssh access to a host running docker.
+- Software that is continuously delivered is of higher quality.
+- Rapid feedback of your changes is paramount.
+- Repeatable deployments to all environments builds confidence.
+- You're not done till your users have seen your work.
+
+It targets applications that will be delivered as Docker images. So it's suited to developing server side software - such as web applications, microservices, etc.
 
 Pre-requisites
 --------------
