@@ -38,9 +38,14 @@ function usage() {
 
 		Main commands
 		-------------
-		 init        Creates a new project in the current directory
-		 run         Builds and restarts your app
-		 tunnel      Tunnels all app's exposed ports to your computer
+		 new TEMPLATE NAME
+		    Creates a new project from a template on github.
+		    Eg. totally new decoupled/microservice fluffy-cats
+		    (That comes from https://github.com/decoupled/microservice)
+
+         init    Sets up totally in an existing directory
+		 run     Builds then runs your app
+		 tunnel  Tunnels all app's exposed ports to your computer
 
 		Troubleshooting commands
 		------------------------
@@ -81,6 +86,43 @@ function usage() {
 
 	USAGE
     exit 1
+}
+
+# Override this function if you like in your ~/.totally
+function instantiate_template() {
+    TEMPLATE=$1
+    NAME=$2
+    shift; shift;
+    REST=$@
+
+    # Fetch templates from github.com
+    if [ -d ~/.totally-templates/$TEMPLATE ]; then
+        if [ -d ~/.totally-templates/$TEMPLATE/.git ]; then
+            (cd ~/.totally-templates/$TEMPLATE && 
+                echo -n 'Updating template: ' &&
+                git pull)
+        else
+            echo Using local template
+        fi
+    else
+        mkdir -p ~/.totally-templates/$TEMPLATE
+        rmdir    ~/.totally-templates/$TEMPLATE # remove just the deepest dir
+        git clone https://github.com/$TEMPLATE ~/.totally-templates/$TEMPLATE
+    fi
+
+    echo -- Instantiating template $TEMPLATE into $NAME
+    ~/.totally-templates/$TEMPLATE/instantiate $NAME $REST
+}
+
+function cmd_new() {
+    TEMPLATE=$1
+    NAME=$2
+
+    [ -z "$TEMPLATE" -o -z "$NAME" ] && die "usage: totally new TEMPLATE NAME"
+
+    instantiate_template $@
+
+    exit 0 # We consumed arguments
 }
 
 function cmd_init() {
@@ -158,7 +200,14 @@ function cmd_config() {
 	HERE
 }
 
+function is_bootstrap_command() {
+    [ "$1" = "new" -o "$1" = "init" -o "$1" = "verbose" ]
+}
+
 function configure() {
+    CMD=$1
+    is_bootstrap_command $CMD && return
+
     if [ -r ~/.totally ]; then 
         source ~/.totally
     fi
@@ -251,6 +300,7 @@ function cmd_logs() {
 function cmd_man() { :; }
 
 function cmd_tunnel() {
+    
     local container_ip=$(ssh $DOCKER_SSH_HOST "docker inspect --format='{{.NetworkSettings.IPAddress}}' $CONTAINER")
     [ -z "$container_ip" ] && 
         die "-- Can't get the IP address of your container. Is it running?"
@@ -267,11 +317,7 @@ function cmd_tunnel() {
         tunnels="$tunnels -L $((TUNNEL_PORT++)):$container_ip:$container_port"
     done
 
-    ssh $tunnels $DOCKER_SSH_HOST 'echo -- Press ^C to close tunnel; sleep 3600'
-}
-
-function is_function() {
-    [ "$( type -t $1 )" = "function" ]
+    ssh $tunnels $DOCKER_SSH_HOST 'echo -- Your tunnels have been bored. Press ^C to close; sleep 3600'
 }
 
 function is_function() {
@@ -281,17 +327,11 @@ function is_function() {
 function command_loop() {
     [ $# = 0 ] && usage
 
-    # init needs to run before configure because it bootstraps configure
-    if [ "init" = "$1" ]; then
-        cmd_init
-        shift
-    fi
-
-    configure
-
     until [ $# = 0 ]; do
         CMD=$1; shift
-        if is_function cmd_$CMD; then
+
+        if is_function "cmd_$CMD"; then
+            configure $CMD
             cmd_$CMD $@ || die "Oops! $CMD exited with $?"
         else
             error Sorry, no such command $CMD

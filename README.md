@@ -16,9 +16,9 @@ It targets applications that will be delivered as Docker images. So it's suited 
 
 A tour of the workflow
 ----------------------
-Say you work for a microcorp, and you've decided to write a new microservice to calculate the price of your widgets. The first thing you would do is create a new cookie-cutter project and get it deployed to a staging environment that is accessible to the consumers of its API.
+Say you work for a forward thinking Decoupled Inc., and you've decided to write a new microservice to calculate the price of your widgets. The first thing you would do is create a new cookie-cutter project and get it deployed to a staging environment that is accessible to the consumers of its API.
 
-	$ totally new microcorp/microservice whats-the-price
+	$ totally new decoupled/microservice whats-the-price
 	$ cd whats-the-price
 	$ totally run
 	...
