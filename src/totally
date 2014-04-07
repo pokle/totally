@@ -31,36 +31,24 @@ function cmd_verbose() {
     log increased verbosity
 }
 
+function configure() {
+    CMD=$1
+    is_bootstrap_command $CMD && return
 
-function cmd_init() {
-    [ -f .totally ] && die "This directory has already been initialised. 'cat .totally' to see your project."
-
-    local BUILD_DIR=$(find . -name Dockerfile | head -1 | xargs dirname)
-
-    if [ -z "$BUILD_DIR" ]; then
-        BUILD_DIR=.
-        log "Creating a quick start Dockerfile - please edit"
-        cat >Dockerfile <<-HERE
-			FROM tianon/centos:6.5
-			ADD . /app
-			WORKDIR /app
-			EXPOSE 8000
-			CMD python -m SimpleHTTPServer 8000
-		HERE
+    if [ -r ~/.totally ]; then 
+        source ~/.totally
     fi
+    
+    configuration_walk $PWD
 
-    local name=$(basename $PWD)
-    cat > .totally <<-HERE
-		NAME="$name"
-		BUILD_DIR="$BUILD_DIR"
-		IMAGE="\$NAME:latest"
-		CONTAINER="\$USER-\$NAME"
-		TUNNEL_PORT=12000
-	HERE
+    # Defaults
+    REMOTE_ROOT=${REMOTE_ROOT:-totally-build}
+    TUNNEL_PORT=${TUNNEL_PORT:-20000}
+    BUILD_DIR=${BUILD_DIR:-.}
 
-    echo Initialised new Totally project called $name
-    exit 0
+    validate_configuration
 }
+
 
 # Recurses up from the current directory all the way to the root
 # directory looking for .totally files to source for configuration overrides
@@ -99,23 +87,6 @@ function is_bootstrap_command() {
     [ "$1" = "new" -o "$1" = "init" -o "$1" = "verbose" ]
 }
 
-function configure() {
-    CMD=$1
-    is_bootstrap_command $CMD && return
-
-    if [ -r ~/.totally ]; then 
-        source ~/.totally
-    fi
-    
-    configuration_walk $PWD
-
-    # Defaults
-    REMOTE_ROOT=${REMOTE_ROOT:-totally-build}
-    TUNNEL_PORT=${TUNNEL_PORT:-20000}
-    BUILD_DIR=${BUILD_DIR:-.}
-
-    validate_configuration
-}
 
 function on_docker_host() {
     local SCRIPT="$1"

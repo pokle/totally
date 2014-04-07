@@ -1,4 +1,34 @@
 
+function cmd_init() {
+    [ -f .totally ] && die "This directory has already been initialised. 'cat .totally' to see your project."
+
+    local BUILD_DIR=$(find . -name Dockerfile | head -1 | xargs dirname)
+
+    if [ -z "$BUILD_DIR" ]; then
+        BUILD_DIR=.
+        log "Creating a quick start Dockerfile - please edit"
+        cat >Dockerfile <<-HERE
+			FROM tianon/centos:6.5
+			ADD . /app
+			WORKDIR /app
+			EXPOSE 8000
+			CMD python -m SimpleHTTPServer 8000
+		HERE
+    fi
+
+    local name=$(basename $PWD)
+    cat > .totally <<-HERE
+		NAME="$name"
+		BUILD_DIR="$BUILD_DIR"
+		IMAGE="\$NAME:latest"
+		CONTAINER="\$USER-\$NAME"
+		TUNNEL_PORT=12000
+	HERE
+
+    echo Initialised new Totally project called $name
+    exit 0
+}
+
 # Override this function if you like in your ~/.totally
 function instantiate_template() {
     TEMPLATE=$1
