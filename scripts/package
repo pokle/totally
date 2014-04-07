@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#
+# Package up totally and its commands in a single file for distribution.
+
+cd $(dirname $0)/..
+mkdir -p bin
+
+# Copyright
+head -20 src/totally > bin/totally
+
+cat src/commands/*.sh >> bin/totally
+cat src/totally >> bin/totally

@@ -1,0 +1,19 @@
+
+
+function cmd_config() {
+    cat <<-HERE
+		# Project
+		NAME=$NAME
+		BUILD_DIR=$BUILD_DIR
+		TUNNEL_PORT=$TUNNEL_PORT
+
+		# Docker
+		IMAGE=$IMAGE
+		CONTAINER=$CONTAINER
+
+		# Docker host
+		DOCKER_SSH_HOST=$DOCKER_SSH_HOST
+		REMOTE_ROOT=$REMOTE_ROOT
+	HERE
+
+}
