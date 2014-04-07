@@ -277,11 +277,26 @@ function cmd_interactive() {
 
 #
 # Troubleshooting commands
-function cmd_top()  { ssh $DOCKER_SSH_HOST "docker top $CONTAINER"; }
-function cmd_ps() { cmd_top; }
-function cmd_inspect() { 
-    ssh $DOCKER_SSH_HOST docker inspect $@ $CONTAINER; 
+
+function on_docker_host() {
+    SCRIPT="$1"
+    ENV_SCRIPT="export NAME=$NAME; export CONTAINER=$CONTAINER; export IMAGE=$IMAGE"
+    ssh $DOCKER_SSH_HOST "$ENV_SCRIPT; $SCRIPT"
+}
+
+function cmd_ps() { on_docker_host 'docker top $CONTAINER'; }
+function cmd_top() { cmd_ps; }
+
+function cmd_inspect() {
+    ARGS="$@"
+    on_docker_host "docker inspect $ARGS \$CONTAINER"
     exit $? # No more commands allowed, because we consume $@
+}
+
+function cmd_docker() {
+    ARGS="$@"
+    on_docker_host "docker $ARGS"
+    exit $?
 }
 
 function cmd_logs() {
