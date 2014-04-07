@@ -1,4 +1,4 @@
-TOTALLY=$BATS_TEST_DIRNAME/../totally
+TOTALLY=$BATS_TEST_DIRNAME/../src/totally
 
 function create_test_home() {
 	HOME="$BATS_TMPDIR/home"

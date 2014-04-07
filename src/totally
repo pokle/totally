@@ -1,0 +1,161 @@
+#!/usr/bin/env bash
+#
+# Totally is inspired by Leiningen, Heroku, swimming pools, and licenced
+# under the GPLv2.
+#
+#   Copyright (C) 2014 Tushar Pokle
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License along
+#   with this program; if not, write to the Free Software Foundation, Inc.,
+#   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+
+#
+# Logging, error handling
+function error() { echo -e ERROR: $@ >&2; }
+function die() { error $@; exit 1; }
+function log() { :; } # Turned off by default - use the verbose command to turn on
+function cmd_verbose() {
+    function log() { echo $@ >&2; }
+    set -x
+    log increased verbosity
+}
+
+
+function cmd_init() {
+    [ -f .totally ] && die "This directory has already been initialised. 'cat .totally' to see your project."
+
+    local BUILD_DIR=$(find . -name Dockerfile | head -1 | xargs dirname)
+
+    if [ -z "$BUILD_DIR" ]; then
+        BUILD_DIR=.
+        log "Creating a quick start Dockerfile - please edit"
+        cat >Dockerfile <<-HERE
+			FROM tianon/centos:6.5
+			ADD . /app
+			WORKDIR /app
+			EXPOSE 8000
+			CMD python -m SimpleHTTPServer 8000
+		HERE
+    fi
+
+    local name=$(basename $PWD)
+    cat > .totally <<-HERE
+		NAME="$name"
+		BUILD_DIR="$BUILD_DIR"
+		IMAGE="\$NAME:latest"
+		CONTAINER="\$USER-\$NAME"
+		TUNNEL_PORT=12000
+	HERE
+
+    echo Initialised new Totally project called $name
+    exit 0
+}
+
+# Recurses up from the current directory all the way to the root
+# directory looking for .totally files to source for configuration overrides
+# Also sets LOCAL_ROOT - which should be the local project root
+function configuration_walk() {
+    if [ "/" != "$PWD" ]; then
+        pushd .. >/dev/null
+        configuration_walk
+        popd >/dev/null
+    fi
+    
+    [ -r $PWD/.totally ] && 
+        log "Sourcing overrides from $PWD/.totally" && 
+        source $PWD/.totally &&
+        LOCAL_ROOT=$PWD # The last recursed $PWD should be the local project root
+}
+
+function validate_configuration() {
+    local errors=""
+    for config_env in DOCKER_SSH_HOST NAME IMAGE CONTAINER; do
+        if [ -z "${!config_env}" ]; then
+            errors="$errors\nMissing configuration environment $config_env"
+        fi
+    done
+
+    if [ ! -f "$LOCAL_ROOT/$BUILD_DIR/Dockerfile" ]; then
+     errors="$errors\nMissing a Dockerfile at $LOCAL_ROOT/$BUILD_DIR."
+    fi
+
+    [ ! -z "$errors" ] && 
+        die "There were configuration errors.\n$errors\n\nPerhaps did you forget to run totally init?"
+}
+
+
+function is_bootstrap_command() {
+    [ "$1" = "new" -o "$1" = "init" -o "$1" = "verbose" ]
+}
+
+function configure() {
+    CMD=$1
+    is_bootstrap_command $CMD && return
+
+    if [ -r ~/.totally ]; then 
+        source ~/.totally
+    fi
+    
+    configuration_walk $PWD
+
+    # Defaults
+    REMOTE_ROOT=${REMOTE_ROOT:-totally-build}
+    TUNNEL_PORT=${TUNNEL_PORT:-20000}
+    BUILD_DIR=${BUILD_DIR:-.}
+
+    validate_configuration
+}
+
+function on_docker_host() {
+    local SCRIPT="$1"
+    ENV_SCRIPT="export NAME=$NAME; export CONTAINER=$CONTAINER; export IMAGE=$IMAGE"
+    ssh $DOCKER_SSH_HOST "$ENV_SCRIPT; $SCRIPT"
+}
+
+function is_function() {
+    [ "$( type -t $1 )" = "function" ]
+}
+
+function command_loop() {
+    [ $# = 0 ] && cmd_help
+
+    until [ $# = 0 ]; do
+        CMD=$1; shift
+
+        if is_function "cmd_$CMD"; then
+            configure $CMD
+            cmd_$CMD $@ || die "Oops! $CMD exited with $?"
+        else
+            die Sorry, no such command $CMD
+        fi
+    done
+}
+
+function load_plugins() {
+    local totally_executable=$1
+    local commands=$(dirname $totally_executable)/commands
+
+    if [ -d "$commands" ]; then
+        for command in $commands/*.sh; do
+            source $command
+        done
+    fi
+}
+
+load_plugins $0
+if [ -z "$TOTALLY_TEST_MODE" ]; then
+    command_loop $@
+else
+    true # Required so that the tests can source this file
+fi
