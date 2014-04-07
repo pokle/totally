@@ -1,3 +1,7 @@
+0.4.0 2014-04-07
+----------------
+- Support plugins
+
 0.3.0 2014-04-02
 ----------------
 - Dockerfiles are now supported in sub directories. 
