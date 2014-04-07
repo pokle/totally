@@ -99,7 +99,7 @@ function instantiate_template() {
     if [ -d ~/.totally-templates/$TEMPLATE ]; then
         if [ -d ~/.totally-templates/$TEMPLATE/.git ]; then
             (cd ~/.totally-templates/$TEMPLATE && 
-                echo -n 'Updating template: ' &&
+                echo -n 'Updating template... ' &&
                 git pull)
         else
             echo Using local template
@@ -238,9 +238,9 @@ function cmd_destroy() {
         function container_exists() { docker inspect --format '.' $CONTAINER > /dev/null 2>&1; }
 
         container_exists &&
-            echo -n 'Stopping ' && 
+            echo -n 'Stopping... ' && 
             docker stop $CONTAINER &&
-            echo -n 'Removing ' &&
+            echo -n 'Removing... ' &&
             docker rm $CONTAINER" &&
     echo -- Destroyed $CONTAINER
 }
