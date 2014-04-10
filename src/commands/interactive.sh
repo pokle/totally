@@ -1,5 +1,5 @@
 function cmd_interactive() {
-    ssh -t $DOCKER_SSH_HOST "docker run --rm -i -t $IMAGE $@"
+    on_docker_host "set -x; docker run --rm -i -t $IMAGE $@"
     exit $? # No more commands allowed, because we consume $@
 }
 

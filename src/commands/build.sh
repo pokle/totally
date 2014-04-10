@@ -3,39 +3,43 @@
 #
 
 function cmd_sync() {
-    echo -- Sync\'ing to $DOCKER_SSH_HOST
-    ssh $DOCKER_SSH_HOST "mkdir -p '$REMOTE_ROOT'"
+    info Sync\'ing to $DOCKER_SSH_HOST
+
+    on_docker_host "mkdir -p '$REMOTE_ROOT'" &&
     rsync --archive --delete $LOCAL_ROOT/$BUILD_DIR/ $DOCKER_SSH_HOST:$REMOTE_ROOT/$NAME/
 }
 
 function cmd_destroy() {
-     ssh -t $DOCKER_SSH_HOST "
+    info "Stopping and removing container"
+    
+    on_docker_host "
         function container_exists() { docker inspect --format '.' $CONTAINER > /dev/null 2>&1; }
 
         container_exists &&
-            echo -n 'Stopping... ' && 
+            set -x
             docker stop $CONTAINER &&
-            echo -n 'Removing... ' &&
-            docker rm $CONTAINER" &&
-    echo -- Destroyed $CONTAINER
+            docker rm $CONTAINER
+    "
 }
 
 function cmd_restart() {
 
     cmd_destroy  # Best effort. Don't care if it fails
 
-    ssh -t $DOCKER_SSH_HOST "
-		echo -n '-- Running $CONTAINER id '
-		docker run --name $CONTAINER -d $IMAGE &&
-	    echo -- SUCCESS. Run 'totally logs' to watch startup
-	"
+    info "Starting container"
+    
+    on_docker_host "set -x; docker run --name $CONTAINER -d $IMAGE" &&
+    
+    info "SUCCESS. Run 'totally logs' to watch startup"
 }
 
 function cmd_build() {
+    BUILD_COMMAND=${BUILD_COMMAND:-docker build -t $IMAGE .}
+
     cmd_sync &&
-    echo -- Building Docker image called $IMAGE on $DOCKER_SSH_HOST &&
-    ssh $DOCKER_SSH_HOST "cd $REMOTE_ROOT/$NAME && docker build -t $IMAGE ." &&
-    echo -- Build successful
+    info "Building image" &&
+    on_docker_host "cd $REMOTE_ROOT/$NAME && set -x && $BUILD_COMMAND"
+
 }
 
 function cmd_run() {

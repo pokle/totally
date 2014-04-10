@@ -6,7 +6,7 @@ function cmd_init() {
 
     if [ -z "$BUILD_DIR" ]; then
         BUILD_DIR=.
-        log "Creating a quick start Dockerfile - please edit"
+        info "Creating a quick start Dockerfile - please edit"
         cat >Dockerfile <<-HERE
 			FROM tianon/centos:6.5
 			ADD . /app
@@ -25,7 +25,7 @@ function cmd_init() {
 		TUNNEL_PORT=12000
 	HERE
 
-    echo Initialised new Totally project called $name
+    info Initialised new Totally project called $name
     exit 0
 }
 

@@ -22,13 +22,22 @@
 
 #
 # Logging, error handling
-function error() { echo -e ERROR: $@ >&2; }
+
+if [ -t 1 ]; then
+    function info()  { echo -e "\033[1;36m--- ${@} ---\033[0m"; }
+    function warn()  { echo -e "\033[1;33mWARNING: ${@}\033[0m"; }
+    function error() { echo -e "\033[1;31mERROR: ${@}\033[0m"; }
+else
+    function info()  { echo "-- ${@}"; }
+    function warn()  { echo "WARNING: ${@}"; }
+    function error() { echo "ERROR: ${@}"; }
+fi
+
 function die() { error $@; exit 1; }
-function log() { :; } # Turned off by default - use the verbose command to turn on
-function cmd_verbose() {
-    function log() { echo $@ >&2; }
-    set -x
-    log increased verbosity
+function debug() { :; }
+function cmd_verbose() { 
+    function debug() { warn $@; }
+    set -x; 
 }
 
 function configure() {
@@ -61,7 +70,7 @@ function configuration_walk() {
     fi
     
     [ -r $PWD/.totally ] && 
-        log "Sourcing overrides from $PWD/.totally" && 
+        debug "Sourcing overrides from $PWD/.totally" && 
         source $PWD/.totally &&
         LOCAL_ROOT=$PWD # The last recursed $PWD should be the local project root
 }
@@ -84,14 +93,14 @@ function validate_configuration() {
 
 
 function is_bootstrap_command() {
-    [ "$1" = "new" -o "$1" = "init" -o "$1" = "verbose" ]
+    [ "$1" = "new" -o "$1" = "init" -o "$1" = "verbose" -o "$1" = "docker" ]
 }
 
 
 function on_docker_host() {
     local SCRIPT="$1"
     ENV_SCRIPT="export NAME=$NAME; export CONTAINER=$CONTAINER; export IMAGE=$IMAGE"
-    ssh $DOCKER_SSH_HOST "$ENV_SCRIPT; $SCRIPT"
+    ssh -t $DOCKER_SSH_HOST "$ENV_SCRIPT; $SCRIPT"
 }
 
 function is_function() {
