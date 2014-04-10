@@ -9,4 +9,9 @@ mkdir -p bin
 head -20 src/totally > bin/totally
 
 cat src/commands/*.sh >> bin/totally
+
+VERSION=$(git describe --tags)
+echo "function cmd_version(){ echo $VERSION; }" >> bin/totally
+
 cat src/totally >> bin/totally
+chmod +x bin/totally

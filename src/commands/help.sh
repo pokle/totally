@@ -41,7 +41,7 @@ function cmd_help() {
 		Auxilliary commands
 		-------------------
 		 verbose 	  For eg. a verbose build: 'totally verbose build'
-		 build   	  Builds a Docker image
+		 version	  Totally version. See https://github.com/pokle/totally/blob/master/CHANGELOG.md
 
 		Configuration
 		-------------
