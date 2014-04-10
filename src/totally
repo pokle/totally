@@ -99,12 +99,18 @@ function is_bootstrap_command() {
 
 
 function on_docker_host() {
+    local ssh_opts="-t"
+    if [ "$1" = "--non-interactively" ]; then
+        ssh_opts=""
+        shift
+    fi
+
     [ -z "$DOCKER_SSH_HOST" ] &&
         die "Please set DOCKER_SSH_HOST atleast in your default config file ~/.totally"
 
     local SCRIPT="$1"
     ENV_SCRIPT="export NAME=\"$NAME\"; export CONTAINER=\"$CONTAINER\"; export IMAGE=\"$IMAGE\""
-    ssh -t $DOCKER_SSH_HOST "$ENV_SCRIPT; $SCRIPT"
+    ssh $ssh_opts $DOCKER_SSH_HOST "$ENV_SCRIPT; $SCRIPT"
 }
 
 function is_function() {
