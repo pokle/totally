@@ -1,3 +1,12 @@
+0.5.0 2014-04-10
+----------------
+- Terminal colours! Much better visibility
+- You can now run 'totally docker ...' outside of a project
+- Added 'version' command
+- Added PRE_BUILD_CMDS config so you can run commands before totally builds an image
+- renamed interactive to run, and the old run becomes daemon
+- Removed ps and inspect commands because they weren't used much
+
 0.4.0 2014-04-07
 ----------------
 - Support plugins
