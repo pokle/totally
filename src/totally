@@ -85,7 +85,7 @@ function validate_configuration() {
     done
 
     if [ ! -f "$LOCAL_ROOT/$BUILD_DIR/Dockerfile" ]; then
-     errors="$errors\nMissing a Dockerfile at $LOCAL_ROOT/$BUILD_DIR."
+     errors="$errors\nMissing a Dockerfile at $LOCAL_ROOT/$BUILD_DIR"
     fi
 
     [ ! -z "$errors" ] && 
