@@ -22,7 +22,6 @@ function cmd_help() {
 		 logs         Tails the console
 		 destroy      Stops the container, and deletes it - losing data
 		 restart      Destroys and starts the container with the latest image
-		 inspect ARGS Shows you information about your container
 		 top          Shows running processes  
 		 ps 	      Same as top
 
@@ -52,10 +51,9 @@ function cmd_help() {
 
 		Chaining commands
 		-----------------
-		Most commands can be chained. Eg. 'totally run logs' runs your app, and
-		then tails the logs. Commands that take arguments like inspect can be
-		chained only if they are the last command called. 
-		For eg. totally run inspect --format '{{.NetworkSettings.IPAddress}}'
+		Most commands can be chained. Eg. 'totally daemon logs' runs your app, and
+		then tails the logs. Commands that take arguments can be chained only if 
+		they are the last command called.
 
 	USAGE
 
