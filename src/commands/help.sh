@@ -23,7 +23,6 @@ function cmd_help() {
 		 destroy      Stops the container, and deletes it - losing data
 		 restart      Destroys and starts the container with the latest image
 		 top          Shows running processes  
-		 ps 	      Same as top
 
 		Ninja commands
 		--------------
