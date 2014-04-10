@@ -48,7 +48,14 @@ function cmd_build() {
 }
 
 function cmd_run() {
-    cmd_build &&
-    cmd_restart
+    cmd_build || die "Build failed"
+    cmd_destroy
+
+    info "Running interactively. ^C to terminate"
+    on_docker_host "set -x; docker run -i -t --name $CONTAINER $IMAGE $@"
+    exit $? # No more commands allowed, because we consume $@
 }
 
+function cmd_daemon() {
+    cmd_restart
+}

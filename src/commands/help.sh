@@ -3,7 +3,7 @@ function cmd_help() {
     cat <<-USAGE  >&2 
 		usage: $0 COMMAND...
 
-		Main build commands
+		Frequently used commands
 		-------------
 		 new TEMPLATE NAME
 				 Creates a new project from a template on github.
@@ -11,7 +11,9 @@ function cmd_help() {
 				 (That comes from https://github.com/decoupled/microservice
 
 		 init    Creates a new project in an existing directory
-		 run     Builds then runs your app
+		 builds  Builds a Docker image of your app
+		 run     Builds and runs your app interactively - ^C to stop
+		 daemon  Runs your app in the background
 		 tunnel  Tunnels all app's exposed ports to your computer
 
 		Troubleshooting commands
@@ -32,11 +34,6 @@ function cmd_help() {
 			  escaped shell syntax. For example:
 
 			  	totally docker wait \\\$CONTAINER
-
-		 interactive ARGS 
-		 	  Like run, but drops you into the container.
-		      Examples: totally interactive bash 
-		      		  : totally build interactive bash
 
 		Auxilliary commands
 		-------------------
