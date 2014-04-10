@@ -43,14 +43,15 @@ function cmd_help() {
 		 verbose 	  For eg. a verbose build: 'totally verbose build'
 		 version	  Totally version. See https://github.com/pokle/totally/blob/master/CHANGELOG.md
 
-		Configuration
-		-------------
+		Configuration variables
+		-----------------------
 		 NAME            Your project name
 		 DOCKER_SSH_HOST A host to build and run your app on
 		 REMOTE_ROOT     The temp. dir. on DOCKER_SSH_HOST to build in
 		 TUNNEL_PORT     A base port number for your tunnels
 		 IMAGE           The name of the Docker image that will be built
 		 CONTAINER       The name of the Docker container to run your app as
+		 PRE_BUILD_CMDS  Bash commands to run locally before building the image
 
 		Chaining commands
 		-----------------

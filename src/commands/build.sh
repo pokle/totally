@@ -36,6 +36,11 @@ function cmd_restart() {
 function cmd_build() {
     BUILD_COMMAND=${BUILD_COMMAND:-docker build -t $IMAGE .}
 
+    if [ ! -z "$PRE_BUILD_CMDS" ]; then
+        info "Running pre-build command"
+        eval "$PRE_BUILD_CMDS" || die "Pre-build commands failed with error code $?"
+    fi
+
     cmd_sync &&
     info "Building image" &&
     on_docker_host "cd $REMOTE_ROOT/$NAME && set -x && $BUILD_COMMAND"

@@ -22,7 +22,8 @@ function cmd_init() {
 		BUILD_DIR="$BUILD_DIR"
 		IMAGE="\$NAME:latest"
 		CONTAINER="\$USER-\$NAME"
-		TUNNEL_PORT=12000
+		# TUNNEL_PORT=12000
+		# PRE_BUILD_CMDS="echo Hello from $(hostname)"
 	HERE
 
     info Initialised new Totally project called $name
