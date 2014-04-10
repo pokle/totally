@@ -94,7 +94,7 @@ function validate_configuration() {
 
 
 function is_bootstrap_command() {
-    [ "$1" = "new" -o "$1" = "init" -o "$1" = "verbose" -o "$1" = "docker" ]
+    [ "$1" = "new" -o "$1" = "init" -o "$1" = "verbose" -o "$1" = "docker" -o "$1" = "version" ]
 }
 
 
