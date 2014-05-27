@@ -1,3 +1,7 @@
+0.6.0 2014-05-27
+----------------
+- build and run are split out again
+
 0.5.0 2014-04-10
 ----------------
 - Terminal colours! Much better visibility
@@ -13,7 +17,7 @@
 
 0.3.0 2014-04-02
 ----------------
-- Dockerfiles are now supported in sub directories. 
+- Dockerfiles are now supported in sub directories.
 - 'totally init' now picks the first Dockerfile it finds.
 - We now have templates
 	- Example: totally new decoupled/microservice fluffy-cats
@@ -24,7 +28,7 @@
 	- You can now practice deployment first development!
 
 			mkdir my-project
-			cd my-project 
+			cd my-project
 			totally init run
 
 		And iterate!
@@ -43,4 +47,3 @@
 0.1.0 2014-03-30
 ----------------
 - First release through HomeBrew
-

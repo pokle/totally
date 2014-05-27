@@ -1,6 +1,14 @@
 function cmd_help() {
 
-    cat <<-USAGE  >&2 
+    cat <<-USAGE  >&2
+		Totally easy peasy lemon squeezy docker development workflow.
+
+		- Edit your Dockerfile on your computer with your favourite editor (Even if it isn't Linux)
+		- Totally takes care of getting your code running on your docker host - wherever it is.
+
+		Learn more at https://github.com/pokle/totally
+
+
 		usage: $0 COMMAND...
 
 		Frequently used commands
@@ -11,8 +19,8 @@ function cmd_help() {
 				 (That comes from https://github.com/decoupled/microservice
 
 		 init    Creates a new project in an existing directory
-		 builds  Builds a Docker image of your app
-		 run     Builds and runs your app interactively - ^C to stop
+		 build   Builds a Docker image of your app
+		 run     Runs your app interactively - ^C to stop
 		 daemon  Runs your app in the background
 		 tunnel  Tunnels all app's exposed ports to your computer
 
@@ -22,11 +30,11 @@ function cmd_help() {
 		 logs         Tails the console
 		 destroy      Stops the container, and deletes it - losing data
 		 restart      Destroys and starts the container with the latest image
-		 top          Shows running processes  
+		 top          Shows running processes
 
 		Ninja commands
 		--------------
-		 docker COMMAND ARGS 
+		 docker COMMAND ARGS
 			  Run a docker command on the server. Refer to your project's
 			  configuration, such as the image name and container name using
 			  escaped shell syntax. For example:
@@ -51,7 +59,7 @@ function cmd_help() {
 		Chaining commands
 		-----------------
 		Most commands can be chained. Eg. 'totally daemon logs' runs your app, and
-		then tails the logs. Commands that take arguments can be chained only if 
+		then tails the logs. Commands that take arguments can be chained only if
 		they are the last command called.
 
 	USAGE

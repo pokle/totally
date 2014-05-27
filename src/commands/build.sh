@@ -11,25 +11,29 @@ function cmd_sync() {
 
 function cmd_destroy() {
     info "Stopping and removing container"
-    
+
     on_docker_host "
         function container_exists() { docker inspect --format '.' $CONTAINER > /dev/null 2>&1; }
 
-        container_exists &&
-            set -x
-            docker stop $CONTAINER &&
-            docker rm $CONTAINER
+        container_exists && (
+
+            set -x;
+            docker stop $CONTAINER && echo stopped $CONTAINER;
+            docker rm $CONTAINER && echo removed $CONTAINER;
+            exit 0 # This was a best effort attempt
+        ) || echo Container doesn\'t exist - nothing to destroy
+
     "
 }
 
 function cmd_restart() {
 
-    cmd_destroy  # Best effort. Don't care if it fails
+    cmd_destroy &&
 
-    info "Starting container"
-    
+    info "Starting container" &&
+
     on_docker_host "set -x; docker run --name $CONTAINER -d $IMAGE" &&
-    
+
     info "SUCCESS. Run 'totally logs' to watch startup"
 }
 
@@ -48,10 +52,9 @@ function cmd_build() {
 }
 
 function cmd_run() {
-    cmd_build || die "Build failed"
-    cmd_destroy
+    cmd_destroy &&
 
-    info "Running interactively. ^C to terminate"
+    info "Running it interactively. ^C to terminate" &&
     on_docker_host "set -x; docker run -i -t --name $CONTAINER $IMAGE $@"
     exit $? # No more commands allowed, because we consume $@
 }

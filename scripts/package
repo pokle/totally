@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Package up totally and its commands in a single file for distribution.
-
+set -x
 cd $(dirname $0)/..
 mkdir -p bin
 

@@ -35,20 +35,20 @@ fi
 
 function die() { error $@; exit 1; }
 function debug() { :; }
-function cmd_verbose() { 
+function cmd_verbose() {
     function debug() { warn $@; }
-    set -x; 
+    set -x;
 }
 
 function configure() {
     CMD=$1
 
     # Defaults
-    if [ -r ~/.totally ]; then 
+    if [ -r ~/.totally ]; then
         source ~/.totally
     fi
 
-    is_bootstrap_command $CMD && return    
+    is_bootstrap_command $CMD && return
     configuration_walk $PWD
 
     # Defaults
@@ -69,9 +69,9 @@ function configuration_walk() {
         configuration_walk
         popd >/dev/null
     fi
-    
-    [ -r $PWD/.totally ] && 
-        debug "Sourcing overrides from $PWD/.totally" && 
+
+    [ -r $PWD/.totally ] &&
+        debug "Sourcing overrides from $PWD/.totally" &&
         source $PWD/.totally &&
         LOCAL_ROOT=$PWD # The last recursed $PWD should be the local project root
 }
@@ -88,7 +88,7 @@ function validate_configuration() {
      errors="$errors\nMissing a Dockerfile at $LOCAL_ROOT/$BUILD_DIR"
     fi
 
-    [ ! -z "$errors" ] && 
+    [ ! -z "$errors" ] &&
         die "There were configuration errors.\n$errors\n\nPerhaps did you forget to run totally init?"
 }
 
