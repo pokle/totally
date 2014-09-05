@@ -5,8 +5,8 @@
 function cmd_sync() {
     info Sync\'ing to $DOCKER_SSH_HOST
 
-    on_docker_host "mkdir -p '$REMOTE_ROOT'" &&
-    rsync --archive --delete $LOCAL_ROOT/$BUILD_DIR/ $DOCKER_SSH_HOST:$REMOTE_ROOT/$NAME/
+    on_docker_host --non-interactively "mkdir -p '$REMOTE_ROOT'" &&
+    rsync --progress --archive --delete $LOCAL_ROOT/$BUILD_DIR/ $DOCKER_SSH_HOST:$REMOTE_ROOT/$NAME/
 }
 
 function cmd_destroy() {
