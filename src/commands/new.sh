@@ -60,9 +60,24 @@ function cmd_new() {
     TEMPLATE=$1
     NAME=$2
 
-    [ -z "$TEMPLATE" -o -z "$NAME" ] && die "usage: totally new TEMPLATE NAME"
+    if [ $# = 1 ]; then
+        TEMPLATE=""
+        NAME=$1
+    elif [ $# = 2 ]; then
+        TEMPLATE="$1"
+        NAME="$2"
+    else 
+        die "usage: totally new [TEMPLATE] NAME"
+    fi
+    
 
-    instantiate_template $@
+    if [ "$TEMPLATE" ]; then
+        instantiate_template $TEMPLATE $NAME
+    else
+        mkdir $NAME || die "Cowardly refusing to overwrite existing directory named $NAME"
+        cd $NAME
+        cmd_init
+    fi
 
     exit 0 # We consumed arguments
 }

@@ -1,9 +1,10 @@
 Totally
 =======
 
-Totally supports a continuous delivery workflow. 
+Totally gives you a continuous delivery workflow for Docker.
 
-It's opinionated software:
+It's opinionated software
+-------------------------
 
 - Software that is continuously delivered is of higher quality.
 - Rapid feedback of your changes is paramount.
